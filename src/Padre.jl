@@ -52,7 +52,7 @@ function sessions(s::Subject;tag=nothing,label=nothing)
     return ss
 end
 
-dsets(sess::Session,label::String) = [Dataset(x["filename"],x["meta"],sess) for x in _sess_dict(sess)["labels"][label]]
+dsets(sess::Session,label::String) = [Dataset(x["filename"],x["meta"],sess) for x in sess_dict(sess)["labels"][label]]
 sess_dir(sess::Session) = "$(subj_dir(sess.subj.subjid))/sessions/$(sess.session)"
 filename(dset::Dataset) = "$(sess_dir(dset.sess))/$(dset.filename)"
 
