@@ -2,6 +2,10 @@ module Padre
 
 using JSON
 
+export Subject,Session,Dataset
+
+export subj_dir,tags,labels,sessions
+export sess_dir,dsets,filename
 
 ## Objects
 
