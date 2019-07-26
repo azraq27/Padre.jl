@@ -58,7 +58,17 @@ function sessions(s::Subject;tag=nothing,label=nothing)
     return ss
 end
 
-dsets(sess::Session,label::String) = [Dataset(x["filename"],x["meta"],sess) for x in sess_dict(sess)["labels"][label]]
+function dsets(sess::Session,label::String;complete::Bool=true)
+    ds = Dataset[]
+    sd = sess_dict(sess)["labels"]
+    haskey(sd,label) || return Dataset[]
+    for x in sd[label]
+        if (! complete) || x["complete"]
+            push!(ds,Dataset(x["filename"],x["meta"],sess))
+        end
+    end
+    return ds
+end
 sess_dir(sess::Session) = "$(subj_dir(sess.subj.subjid))/sessions/$(sess.session)"
 filename(dset::Dataset) = "$(sess_dir(dset.sess))/$(dset.filename)"
 
