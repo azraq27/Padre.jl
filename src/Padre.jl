@@ -42,8 +42,14 @@ Subject(subjid::String) = Subject(subjid,JSON.parsefile(json_file(subjid)))
 ## Access functions
 
 sess_dict(sess::Session) = sess.subj.json["sessions"][sess.session]
-tags(sess::Session) = sess_dict(sess)["tags"]
-labels(sess::Session) = collect(keys(sess_dict(sess)["labels"]))
+function tags(sess::Session)
+    sd = sess_dict(sess)
+    return haskey(sd,"tags") ? sd["tags"] : []
+end
+function labels(sess::Session)
+    sd = sess_dict(sess)
+    return haskey(sd,"labels") ? sd["labels"] : []
+end
 
 function sessions(s::Subject;tag=nothing,label=nothing)
     ss = [Session(s,session) for session in keys(s.json["sessions"])]
