@@ -51,8 +51,13 @@ function labels(sess::Session)
     return haskey(sd,"labels") ? sd["labels"] : []
 end
 
-function sessions(s::Subject;tag=nothing,label=nothing)
-    ss = [Session(s,session) for session in keys(s.json["sessions"])]
+function sessions(s::Subject;tag=nothing,label=nothing,include::Bool=true)
+    ss = Session[]
+    for session in keys(s.json["sessions"])
+        if (include == false) || (haskey(s.json["sessions"][session],"include") && s.json["sessions"][session]["include"])
+            push!(ss,Session(s,session))
+        end
+    end
     tag != nothing && (ss = filter(x->tag in tags(x),ss))
     label != nothing && (ss = filter(x->label in labels(x),ss))
     return ss
