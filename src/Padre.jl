@@ -4,8 +4,15 @@ using JSON
 
 export Subject,Session,Dataset
 
+export padre_subjects
 export subj_dir,tags,labels,sessions
 export sess_dir,dsets,filename
+
+## Config
+
+padre_dir = ENV["PADRE_ROOT"]
+subj_dir(subjid::String) = "$padre_dir/Data/$subjid"
+json_file(subjid::String) = "$(subj_dir(subjid))/$subjid.json"
 
 ## Objects
 
@@ -31,11 +38,27 @@ function show(io::IO,s::Subject)
     return nothing
 end
 
-## Make a Subject
+## Global functions
 
-padre_dir = ENV["PADRE_ROOT"]
-subj_dir(subjid::String) = "$padre_dir/Data/$subjid"
-json_file(subjid::String) = "$(subj_dir(subjid))/$subjid.json"
+"""
+    padre_subjects()
+
+Return list of all available subjects as `Subject` objects."""
+function padre_subjects()
+    subjs = Subject[]
+    
+    for s in readdir(joinpath(padre_dir,"Data"))
+        try
+            subj = Subject(s)
+            push!(subjs,subj)
+        catch
+        end
+    end
+    subjs
+end
+    
+
+## Make a Subject
 
 Subject(subjid::String) = Subject(subjid,JSON.parsefile(json_file(subjid)))
 
@@ -74,6 +97,21 @@ function dsets(sess::Session,label::String;complete::Bool=true)
     end
     return ds
 end
+
+function dsets(subj::Subject,label::String;complete::Bool=true,tag=nothing)
+    ds = Dataset[]
+    for sess in sessions(subj;tag)
+        sd = sess_dict(sess)["labels"]
+        haskey(sd,label) || return Dataset[]
+        for x in sd[label]
+            if (! complete) || x["complete"]
+                push!(ds,Dataset(x["filename"],x["meta"],sess))
+            end
+        end
+    end
+    return ds
+end
+
 sess_dir(sess::Session) = "$(subj_dir(sess.subj.subjid))/sessions/$(sess.session)"
 filename(dset::Dataset) = "$(sess_dir(dset.sess))/$(dset.filename)"
 
